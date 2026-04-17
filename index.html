@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Notes App</title>
+</head>
+<body>
+
+<h1>My Notes</h1>
+
+<textarea id="noteInput" placeholder="Write a note..."></textarea><br>
+<button onclick="addNote()">Add Note</button>
+
+<ul id="notesList"></ul>
+
+<script>
+const API_URL = "http://localhost:3000"; // later we change this
+
+async function fetchNotes() {
+  const res = await fetch(`${API_URL}/notes`);
+  const notes = await res.json();
+
+  const list = document.getElementById("notesList");
+  list.innerHTML = "";
+
+  notes.forEach(note => {
+    const li = document.createElement("li");
+    li.textContent = note.content;
+
+    const btn = document.createElement("button");
+    btn.textContent = "Delete";
+    btn.onclick = () => deleteNote(note.id);
+
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+async function addNote() {
+  const content = document.getElementById("noteInput").value;
+
+  await fetch(`${API_URL}/notes`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ content })
+  });
+
+  document.getElementById("noteInput").value = "";
+  fetchNotes();
+}
+
+async function deleteNote(id) {
+  await fetch(`${API_URL}/notes/${id}`, {
+    method: "DELETE"
+  });
+
+  fetchNotes();
+}
+
+fetchNotes();
+</script>
+
+</body>
+</html>
